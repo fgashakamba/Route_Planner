@@ -12,7 +12,14 @@ import time
 import tempfile
 import urllib.parse
 import asyncio
+from dotenv import load_dotenv
 from calculate_optimal_route import optimal_route
+
+load_dotenv()
+
+CARTO_API_KEY = os.environ.get('CARTO_API_KEY', '').strip()
+if not CARTO_API_KEY:
+    raise ValueError("CARTO_API_KEY environment variable not set.")
 
 # Load auxiliary layers
 lakes = gpd.read_file(os.path.join(os.path.dirname(__file__),  'data_wgs84', 'RW_lakes.gpkg'))
@@ -840,7 +847,21 @@ def server(input, output, session):
                     del m._children[key]
             
             # Add basemaps
-            folium.TileLayer('CartoDB positron', name='CartoDB Positron').add_to(m)
+            carto_positron_tiles = (
+                'https://{s}.basemaps.cartocdn.com/light_all/'
+                f'{{z}}/{{x}}/{{y}}{{r}}.png?key={urllib.parse.quote(CARTO_API_KEY, safe="")}'
+            )
+            folium.TileLayer(
+                tiles=carto_positron_tiles,
+                attr=(
+                    '&copy; <a href="https://www.openstreetmap.org/copyright">'
+                    'OpenStreetMap</a> contributors &copy; '
+                    '<a href="https://carto.com/attributions">CARTO</a>'
+                ),
+                name='CARTO Positron',
+                subdomains='abcd',
+                max_zoom=20,
+            ).add_to(m)
             folium.TileLayer(
                 tiles='https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
                 attr='Google',
