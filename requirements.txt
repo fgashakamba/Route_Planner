@@ -1,0 +1,11 @@
+shiny
+pandas
+geopandas
+folium
+jinja2
+shapely
+jenkspy
+fiona
+openrouteservice
+python-dotenv
+
